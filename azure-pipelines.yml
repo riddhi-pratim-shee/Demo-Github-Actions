@@ -22,6 +22,8 @@ stages:
     jobs:
       - job: test_job
         steps:
+          - script: npm install
+            workingDirectory: 'src'
           - script: npm test
             workingDirectory: 'src'
 
