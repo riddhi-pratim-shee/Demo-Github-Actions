@@ -9,44 +9,67 @@ stages:
     displayName: "Install Stage"
     jobs:
       - job: install_job
-        displayName: "Install Dependencies"
         steps:
           - task: NodeTool@0
             inputs:
               versionSpec: '18.x'
-            displayName: "Install Node.js"
-
           - script: npm install
             workingDirectory: 'src'
-            displayName: "NPM Install"
 
   - stage: Test
     displayName: "Test Stage"
     dependsOn: Install
     jobs:
       - job: test_job
-        displayName: "Run Tests"
         steps:
-          - task: NodeTool@0
-            inputs:
-              versionSpec: '18.x'
-            displayName: "Install Node.js"
-
-          - script: npm ci || npm install
-            workingDirectory: 'src'
-            displayName: "Install dependencies (for test)"
-
           - script: npm test
             workingDirectory: 'src'
-            displayName: "Run Tests"
 
-
-  - stage: Deploy
-    displayName: "Deploy Stage"
+  # ---------------------------
+  # DEPLOY TO DEV
+  # ---------------------------
+  - stage: Deploy_Dev
+    displayName: "Deploy to Dev"
     dependsOn: Test
     jobs:
-      - job: deploy_job
-        displayName: "Deploy Job"
-        steps:
-          - script: echo "hello from deploy stage!"
-            displayName: "Deploy Step"
+      - deployment: DevDeploy
+        displayName: "Dev Deployment Job"
+        environment: "riddhi_demo_dev"
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - script: echo "Deploying to DEV..."
+                  workingDirectory: 'src'
+
+  # ---------------------------
+  # DEPLOY TO QA (with approval)
+  # ---------------------------
+  - stage: Deploy_QA
+    displayName: "Deploy to QA"
+    dependsOn: Deploy_Dev
+    jobs:
+      - deployment: QADeploy
+        environment: "riddhi_demo_QA"
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - script: echo "Deploying to QA..."
+                  workingDirectory: 'src'
+
+  # ---------------------------
+  # DEPLOY TO PROD (manual approval)
+  # ---------------------------
+  - stage: Deploy_Prod
+    displayName: "Deploy to Prod"
+    dependsOn: Deploy_QA
+    jobs:
+      - deployment: ProdDeploy
+        environment: "riddhi_demo_prod"
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - script: echo "Deploying to PROD..."
+                  workingDirectory: 'src'
