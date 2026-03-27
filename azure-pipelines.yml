@@ -39,8 +39,10 @@ stages:
           runOnce:
             deploy:
               steps:
-                - script: echo "Deploying to DEV..."
-                  workingDirectory: 'src'
+              - task: CmdLine@2
+                displayName: "Deploy Step"
+                inputs:
+                  script: echo "hello from deploy stage!"
 
 
   - stage: Deploy_QA
