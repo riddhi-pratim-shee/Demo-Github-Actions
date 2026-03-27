@@ -4,19 +4,49 @@ trigger:
 pool:
   vmImage: 'ubuntu-latest'
 
-steps:
-  - task: NodeTool@0
-    inputs:
-      versionSpec: '18.x'
-    displayName: "Install Node.js"
+stages:
+  - stage: Install
+    displayName: "Install Stage"
+    jobs:
+      - job: install_job
+        displayName: "Install Dependencies"
+        steps:
+          - task: NodeTool@0
+            inputs:
+              versionSpec: '18.x'
+            displayName: "Install Node.js"
 
-  - script: npm install
-    workingDirectory: 'src'
-    displayName: "Install dependencies"
+          - script: npm install
+            workingDirectory: 'src'
+            displayName: "NPM Install"
 
-  - script: npm test
-    workingDirectory: 'src'
-    displayName: "Run tests"
+  - stage: Test
+    displayName: "Test Stage"
+    dependsOn: Install
+    jobs:
+      - job: test_job
+        displayName: "Run Tests"
+        steps:
+          - task: NodeTool@0
+            inputs:
+              versionSpec: '18.x'
+            displayName: "Install Node.js"
 
-  - script: echo "hello"
-    displayName: "Deploy step (just printing hello)"
+          - script: npm ci || npm install
+            workingDirectory: 'src'
+            displayName: "Install dependencies (for test)"
+
+          - script: npm test
+            workingDirectory: 'src'
+            displayName: "Run Tests"
+
+
+  - stage: Deploy
+    displayName: "Deploy Stage"
+    dependsOn: Test
+    jobs:
+      - job: deploy_job
+        displayName: "Deploy Job"
+        steps:
+          - script: echo "hello from deploy stage!"
+            displayName: "Deploy Step"
