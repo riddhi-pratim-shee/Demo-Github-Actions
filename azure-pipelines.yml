@@ -25,9 +25,7 @@ stages:
           - script: npm test
             workingDirectory: 'src'
 
-  # ---------------------------
-  # DEPLOY TO DEV
-  # ---------------------------
+
   - stage: Deploy_Dev
     displayName: "Deploy to Dev"
     dependsOn: Test
@@ -42,9 +40,7 @@ stages:
                 - script: echo "Deploying to DEV..."
                   workingDirectory: 'src'
 
-  # ---------------------------
-  # DEPLOY TO QA (with approval)
-  # ---------------------------
+
   - stage: Deploy_QA
     displayName: "Deploy to QA"
     dependsOn: Deploy_Dev
@@ -58,9 +54,6 @@ stages:
                 - script: echo "Deploying to QA..."
                   workingDirectory: 'src'
 
-  # ---------------------------
-  # DEPLOY TO PROD (manual approval)
-  # ---------------------------
   - stage: Deploy_Prod
     displayName: "Deploy to Prod"
     dependsOn: Deploy_QA
